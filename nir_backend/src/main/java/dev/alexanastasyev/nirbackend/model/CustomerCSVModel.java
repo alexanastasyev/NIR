@@ -1,4 +1,4 @@
-package dev.alexanastasyev.nirbackend.entity;
+package dev.alexanastasyev.nirbackend.model;
 
 import com.opencsv.bean.CsvBindByPosition;
 
