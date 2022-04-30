@@ -22,36 +22,39 @@ import java.util.stream.Collectors;
 public class CsvController {
 
     @GetMapping("")
-    public ResponseEntity<List<CustomerClusteringModel>> readCSV() {
-
+    public ResponseEntity<List<CustomerClusteringModel>> getCustomerModels() {
         try {
-            List<CustomerCSVModel> csvModels = new ArrayList<>();
-
-            Reader reader = Files.newBufferedReader(Paths.get("marketing_campaign.csv"));
-            CsvToBean<CustomerCSVModel> csv = new CsvToBeanBuilder<CustomerCSVModel>(reader)
-                    .withType(CustomerCSVModel.class)
-                    .withSeparator('\t')
-                    .withIgnoreLeadingWhiteSpace(true)
-                    .build();
-
-            for (CustomerCSVModel customerCSVModel : csv) {
-                csvModels.add(customerCSVModel);
-            }
-
-            csvModels.remove(0);
-
-            List<CustomerClusteringModel> clusteringModels = csvModels.parallelStream()
-                    .filter(model -> !model.getIncome().isEmpty())
-                    .filter(model -> !model.getEnrollmentDate().isEmpty())
-                    .map(CustomerClusteringModel::new)
-                    .collect(Collectors.toList());
-
+            List<CustomerCSVModel> csvModels = readCsvModelsFromFile();
+            List<CustomerClusteringModel> clusteringModels = convertCSVModelsToClustering(csvModels);
             return ResponseEntity.ok(clusteringModels);
-
         } catch (IOException e) {
             return ResponseEntity.internalServerError().body(new ArrayList<>());
         }
+    }
 
+    private List<CustomerCSVModel> readCsvModelsFromFile() throws IOException {
+        List<CustomerCSVModel> csvModels = new ArrayList<>();
+
+        Reader reader = Files.newBufferedReader(Paths.get("marketing_campaign.csv"));
+        CsvToBean<CustomerCSVModel> csv = new CsvToBeanBuilder<CustomerCSVModel>(reader)
+                .withType(CustomerCSVModel.class)
+                .withSeparator('\t')
+                .withIgnoreLeadingWhiteSpace(true)
+                .build();
+
+        for (CustomerCSVModel customerCSVModel : csv) {
+            csvModels.add(customerCSVModel);
+        }
+        csvModels.remove(0);
+
+        return csvModels;
+    }
+
+    private List<CustomerClusteringModel> convertCSVModelsToClustering(List<CustomerCSVModel> csvModels) {
+        return csvModels.parallelStream()
+                .filter(CustomerCSVModel::hasNoEmptyFields)
+                .map(CustomerClusteringModel::new)
+                .collect(Collectors.toList());
     }
 
 }

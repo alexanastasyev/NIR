@@ -2,6 +2,8 @@ package dev.alexanastasyev.nirbackend.model;
 
 import com.opencsv.bean.CsvBindByPosition;
 
+import java.lang.reflect.Field;
+
 public class CustomerCSVModel {
 
     /**
@@ -164,6 +166,20 @@ public class CustomerCSVModel {
      */
     @CsvBindByPosition(position = 19)
     private String visitsAmount;
+
+    public boolean hasNoEmptyFields() {
+        Field[] fields = this.getClass().getDeclaredFields();
+        for (Field field : fields) {
+            try {
+                if (((String) field.get(this)).isEmpty()) {
+                    return false;
+                }
+            } catch (IllegalAccessException exception) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     public String getId() {
         return id;
