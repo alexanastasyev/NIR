@@ -37,12 +37,8 @@ class Table extends React.Component {
                 selector: row => row.income
             },
             {
-                name: "Kids",
-                selector: row => row.kidsAmount
-            },
-            {
-                name: "Teens",
-                selector: row => row.teensAmount
+                name: "Children",
+                selector: row => row.childrenAmount
             },
             {
                 name: "Date of enrollment",
@@ -85,28 +81,8 @@ class Table extends React.Component {
                 selector: row => row.discountPurchasesAmount
             },
             {
-                name: "Campaign 1",
-                selector: row => row.acceptedCampaign1
-            },
-            {
-                name: "Campaign 2",
-                selector: row => row.acceptedCampaign2
-            },
-            {
-                name: "Campaign 3",
-                selector: row => row.acceptedCampaign3
-            },
-            {
-                name: "Campaign 4",
-                selector: row => row.acceptedCampaign4
-            },
-            {
-                name: "Campaign 5",
-                selector: row => row.acceptedCampaign5
-            },
-            {
-                name: "Last campaign",
-                selector: row => row.response
+                name: "Campaigns",
+                selector: row => row.acceptedCampaignsAmount
             },
             {
                 name: "Web purchases",
@@ -122,7 +98,7 @@ class Table extends React.Component {
             },
             {
                 name: "Web site visits",
-                selector: row => row.visitsAmount
+                selector: row => row.websiteVisitsAmount
             }
         ];
 
