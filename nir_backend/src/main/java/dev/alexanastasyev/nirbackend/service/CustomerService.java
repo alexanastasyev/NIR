@@ -2,6 +2,7 @@ package dev.alexanastasyev.nirbackend.service;
 
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
+import dev.alexanastasyev.nirbackend.exception.SelectionIsEmptyException;
 import dev.alexanastasyev.nirbackend.model.CustomerCSVModel;
 import dev.alexanastasyev.nirbackend.model.CustomerClusteringModel;
 import dev.alexanastasyev.nirbackend.util.DoubleGetter;
@@ -14,7 +15,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.function.ToDoubleFunction;
 import java.util.stream.Collectors;
 
@@ -91,14 +91,14 @@ public class CustomerService {
                                      ToDoubleFunction<CustomerClusteringModel> fieldGetter) {
         return clusteringModels.parallelStream()
                 .mapToDouble(fieldGetter)
-                .max().orElseThrow(NoSuchElementException::new);
+                .max().orElseThrow(SelectionIsEmptyException::new);
     }
 
     private double findMinFieldValue(List<CustomerClusteringModel> clusteringModels,
                                      ToDoubleFunction<CustomerClusteringModel> fieldGetter) {
         return clusteringModels.parallelStream()
                 .mapToDouble(fieldGetter)
-                .min().orElseThrow(NoSuchElementException::new);
+                .min().orElseThrow(SelectionIsEmptyException::new);
     }
 
     private double calculateNormalizedValue(double baseValue, double min, double max) {

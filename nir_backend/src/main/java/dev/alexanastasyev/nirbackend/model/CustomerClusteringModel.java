@@ -127,9 +127,9 @@ public class CustomerClusteringModel {
         if ("YOLO".equals(csvModel.getMaritalStatus()) || "Absurd".equals(csvModel.getMaritalStatus())
                 || "Alone".equals(csvModel.getMaritalStatus()) || "Widow".equals(csvModel.getMaritalStatus())
                 || "Divorced".equals(csvModel.getMaritalStatus())) {
-            this.maritalStatus = 1;
-        } else if ("Together".equals(csvModel.getMaritalStatus()) || "Married".equals(csvModel.getMaritalStatus())) {
             this.maritalStatus = 0;
+        } else if ("Together".equals(csvModel.getMaritalStatus()) || "Married".equals(csvModel.getMaritalStatus())) {
+            this.maritalStatus = 1;
         }
 
         this.income = Double.parseDouble(csvModel.getIncome());
