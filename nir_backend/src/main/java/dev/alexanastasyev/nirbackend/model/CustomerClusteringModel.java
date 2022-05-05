@@ -2,6 +2,7 @@ package dev.alexanastasyev.nirbackend.model;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Objects;
 
 public class CustomerClusteringModel {
 
@@ -372,5 +373,18 @@ public class CustomerClusteringModel {
                 ", storePurchasesAmount=" + storePurchasesAmount +
                 ", websiteVisitsAmount=" + websiteVisitsAmount +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CustomerClusteringModel that = (CustomerClusteringModel) o;
+        return id == that.id && Double.compare(that.birthYear, birthYear) == 0 && Double.compare(that.education, education) == 0 && Double.compare(that.maritalStatus, maritalStatus) == 0 && Double.compare(that.income, income) == 0 && Double.compare(that.childrenAmount, childrenAmount) == 0 && Double.compare(that.enrollmentDate, enrollmentDate) == 0 && Double.compare(that.recency, recency) == 0 && Double.compare(that.complains, complains) == 0 && Double.compare(that.wineAmount, wineAmount) == 0 && Double.compare(that.fruitsAmount, fruitsAmount) == 0 && Double.compare(that.meatAmount, meatAmount) == 0 && Double.compare(that.fishAmount, fishAmount) == 0 && Double.compare(that.sweetAmount, sweetAmount) == 0 && Double.compare(that.goldAmount, goldAmount) == 0 && Double.compare(that.discountPurchasesAmount, discountPurchasesAmount) == 0 && Double.compare(that.acceptedCampaignsAmount, acceptedCampaignsAmount) == 0 && Double.compare(that.webPurchasesAmount, webPurchasesAmount) == 0 && Double.compare(that.catalogPurchasesAmount, catalogPurchasesAmount) == 0 && Double.compare(that.storePurchasesAmount, storePurchasesAmount) == 0 && Double.compare(that.websiteVisitsAmount, websiteVisitsAmount) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, birthYear, education, maritalStatus, income, childrenAmount, enrollmentDate, recency, complains, wineAmount, fruitsAmount, meatAmount, fishAmount, sweetAmount, goldAmount, discountPurchasesAmount, acceptedCampaignsAmount, webPurchasesAmount, catalogPurchasesAmount, storePurchasesAmount, websiteVisitsAmount);
     }
 }

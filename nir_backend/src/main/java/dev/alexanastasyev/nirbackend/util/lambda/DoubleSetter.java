@@ -1,4 +1,4 @@
-package dev.alexanastasyev.nirbackend.util;
+package dev.alexanastasyev.nirbackend.util.lambda;
 
 @FunctionalInterface
 public interface DoubleSetter {

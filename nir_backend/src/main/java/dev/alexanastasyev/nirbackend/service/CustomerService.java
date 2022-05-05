@@ -1,108 +1,109 @@
 package dev.alexanastasyev.nirbackend.service;
 
-import com.opencsv.bean.CsvToBean;
-import com.opencsv.bean.CsvToBeanBuilder;
-import dev.alexanastasyev.nirbackend.exception.SelectionIsEmptyException;
 import dev.alexanastasyev.nirbackend.model.CustomerCSVModel;
 import dev.alexanastasyev.nirbackend.model.CustomerClusteringModel;
-import dev.alexanastasyev.nirbackend.util.DoubleGetter;
-import dev.alexanastasyev.nirbackend.util.DoubleSetter;
+import dev.alexanastasyev.nirbackend.repository.CustomerRepository;
+import dev.alexanastasyev.nirbackend.util.clustering.CustomerCSVToClusteringConverter;
+import dev.alexanastasyev.nirbackend.util.clustering.GraphClusteringUtil;
+import dev.alexanastasyev.nirbackend.util.graph.Graph;
+import dev.alexanastasyev.nirbackend.util.graph.Vertex;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.io.Reader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.function.ToDoubleFunction;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
 public class CustomerService {
 
+    private final CustomerRepository customerRepository;
+    private Graph<CustomerClusteringModel> graph;
+
+    @Autowired
+    public CustomerService(CustomerRepository customerRepository) {
+        this.customerRepository = customerRepository;
+    }
+
     public List<CustomerClusteringModel> getCustomerClusteringModels() throws IOException {
-        List<CustomerCSVModel> csvModels = readCsvModelsFromFile();
-        List<CustomerClusteringModel> clusteringModels = convertCSVModelsToClustering(csvModels);
-        normalizeCustomerModels(clusteringModels);
-        return clusteringModels;
+        return getConvertedCustomerClusteringModels();
     }
 
-    private List<CustomerCSVModel> readCsvModelsFromFile() throws IOException {
-        List<CustomerCSVModel> csvModels = new ArrayList<>();
+    public List<Set<Long>> getCustomerIdsClusters(double level) throws IOException {
+        Graph<CustomerClusteringModel> graph = getCustomerClusteringModelsGraph();
 
-        Reader reader = Files.newBufferedReader(Paths.get("marketing_campaign.csv"));
-        CsvToBean<CustomerCSVModel> csv = new CsvToBeanBuilder<CustomerCSVModel>(reader)
-                .withType(CustomerCSVModel.class)
-                .withSeparator('\t')
-                .withIgnoreLeadingWhiteSpace(true)
-                .build();
+        GraphClusteringUtil<CustomerClusteringModel> graphUtil = new GraphClusteringUtil<>(graph);
+        graphUtil.removeLongEdges(level);
+        List<Set<CustomerClusteringModel>> modelClusters = graphUtil.getClustersFromGraph();
 
-        for (CustomerCSVModel customerCSVModel : csv) {
-            csvModels.add(customerCSVModel);
+        List<Set<Long>> idClusters = new ArrayList<>();
+        modelClusters.forEach(cluster -> idClusters.add(cluster.stream()
+                .map(CustomerClusteringModel::getId)
+                .collect(Collectors.toSet())
+        ));
+
+        return idClusters;
+    }
+
+    private Graph<CustomerClusteringModel> getCustomerClusteringModelsGraph() throws IOException {
+        if (this.graph == null) {
+            Graph<CustomerClusteringModel> graph = new Graph<>();
+            getConvertedCustomerClusteringModels().forEach(graph::addVertex);
+
+            for (int i = 0; i < graph.getVertices().size() - 1; i++) {
+                for (int j = i + 1; j < graph.getVertices().size(); j++) {
+                    Vertex<CustomerClusteringModel> vertexFrom = graph.getVertices().get(i);
+                    Vertex<CustomerClusteringModel> vertexTo = graph.getVertices().get(j);
+                    double distance = calculateDistance(vertexFrom.getValue(), vertexTo.getValue());
+                    graph.addEdge(vertexFrom, vertexTo, distance);
+                }
+            }
+            this.graph = graph;
         }
-        csvModels.remove(0);
 
-        return csvModels;
+        // TODO: return clone of this.graph
+        return this.graph;
     }
 
-    private List<CustomerClusteringModel> convertCSVModelsToClustering(List<CustomerCSVModel> csvModels) {
-        return csvModels.parallelStream()
-                .filter(CustomerCSVModel::hasNoEmptyFields)
-                .map(CustomerClusteringModel::new)
-                .collect(Collectors.toList());
+    private List<CustomerClusteringModel> getConvertedCustomerClusteringModels() throws IOException {
+        List<CustomerCSVModel> csvModels = customerRepository.getCustomerCsvModels();
+        return CustomerCSVToClusteringConverter.convertCSVModelsToClustering(csvModels);
     }
 
-    @SuppressWarnings("DuplicatedCode")
-    private void normalizeCustomerModels(List<CustomerClusteringModel> clusteringModels) {
-        clusteringModels.parallelStream().forEach(model -> {
-            normalizeField(clusteringModels, CustomerClusteringModel::getBirthYear, model::getBirthYear, model::setBirthYear);
-            normalizeField(clusteringModels, CustomerClusteringModel::getEducation, model::getEducation, model::setEducation);
-            normalizeField(clusteringModels, CustomerClusteringModel::getMaritalStatus, model::getMaritalStatus, model::setMaritalStatus);
-            normalizeField(clusteringModels, CustomerClusteringModel::getIncome, model::getIncome, model::setIncome);
-            normalizeField(clusteringModels, CustomerClusteringModel::getChildrenAmount, model::getChildrenAmount, model::setChildrenAmount);
-            normalizeField(clusteringModels, CustomerClusteringModel::getEnrollmentDate, model::getEnrollmentDate, model::setEnrollmentDate);
-            normalizeField(clusteringModels, CustomerClusteringModel::getRecency, model::getRecency, model::setRecency);
-            normalizeField(clusteringModels, CustomerClusteringModel::getComplains, model::getComplains, model::setComplains);
-            normalizeField(clusteringModels, CustomerClusteringModel::getWineAmount, model::getWineAmount, model::setWineAmount);
-            normalizeField(clusteringModels, CustomerClusteringModel::getFruitsAmount, model::getFruitsAmount, model::setFruitsAmount);
-            normalizeField(clusteringModels, CustomerClusteringModel::getMeatAmount, model::getMeatAmount, model::setMeatAmount);
-            normalizeField(clusteringModels, CustomerClusteringModel::getFishAmount, model::getFishAmount, model::setFishAmount);
-            normalizeField(clusteringModels, CustomerClusteringModel::getSweetAmount, model::getSweetAmount, model::setSweetAmount);
-            normalizeField(clusteringModels, CustomerClusteringModel::getGoldAmount, model::getGoldAmount, model::setGoldAmount);
-            normalizeField(clusteringModels, CustomerClusteringModel::getDiscountPurchasesAmount, model::getDiscountPurchasesAmount, model::setDiscountPurchasesAmount);
-            normalizeField(clusteringModels, CustomerClusteringModel::getAcceptedCampaignsAmount, model::getAcceptedCampaignsAmount, model::setAcceptedCampaignsAmount);
-            normalizeField(clusteringModels, CustomerClusteringModel::getWebPurchasesAmount, model::getWebPurchasesAmount, model::setWebPurchasesAmount);
-            normalizeField(clusteringModels, CustomerClusteringModel::getCatalogPurchasesAmount, model::getCatalogPurchasesAmount, model::setCatalogPurchasesAmount);
-            normalizeField(clusteringModels, CustomerClusteringModel::getStorePurchasesAmount, model::getStorePurchasesAmount, model::setStorePurchasesAmount);
-            normalizeField(clusteringModels, CustomerClusteringModel::getWebsiteVisitsAmount, model::getWebsiteVisitsAmount, model::setWebsiteVisitsAmount);
-        });
+    private double calculateDistance(CustomerClusteringModel model1, CustomerClusteringModel model2) {
+        return Math.sqrt(sum(
+                sqrDif(model1.getBirthYear(), model2.getBirthYear()),
+                sqrDif(model1.getEducation(), model2.getEducation()),
+                sqrDif(model1.getMaritalStatus(), model2.getMaritalStatus()),
+                sqrDif(model1.getIncome(), model2.getIncome()),
+                sqrDif(model1.getChildrenAmount(), model2.getChildrenAmount()),
+                sqrDif(model1.getEnrollmentDate(), model2.getEnrollmentDate()),
+                sqrDif(model1.getRecency(), model2.getRecency()),
+                sqrDif(model1.getComplains(), model2.getComplains()),
+                sqrDif(model1.getWineAmount(), model2.getWineAmount()),
+                sqrDif(model1.getFishAmount(), model2.getFishAmount()),
+                sqrDif(model1.getMeatAmount(), model2.getMeatAmount()),
+                sqrDif(model1.getFishAmount(), model2.getFishAmount()),
+                sqrDif(model1.getSweetAmount(), model2.getSweetAmount()),
+                sqrDif(model1.getGoldAmount(), model2.getGoldAmount()),
+                sqrDif(model1.getDiscountPurchasesAmount(), model2.getDiscountPurchasesAmount()),
+                sqrDif(model1.getAcceptedCampaignsAmount(), model2.getAcceptedCampaignsAmount()),
+                sqrDif(model1.getWebPurchasesAmount(), model2.getWebPurchasesAmount()),
+                sqrDif(model1.getCatalogPurchasesAmount(), model2.getCatalogPurchasesAmount()),
+                sqrDif(model1.getStorePurchasesAmount(), model2.getStorePurchasesAmount()),
+                sqrDif(model1.getWebsiteVisitsAmount(), model2.getWebsiteVisitsAmount())
+        ));
     }
 
-    private void normalizeField(List<CustomerClusteringModel> clusteringModels,
-                                ToDoubleFunction<CustomerClusteringModel> getterReference,
-                                DoubleGetter getter, DoubleSetter setter) {
-        double minValue = findMinFieldValue(clusteringModels, getterReference);
-        double maxValue = findMaxFieldValue(clusteringModels, getterReference);
-        setter.setValue( calculateNormalizedValue( getter.getValue(), minValue, maxValue ) );
+    private double sum(double... values) {
+        return Arrays.stream(values).sum();
     }
 
-    private double findMaxFieldValue(List<CustomerClusteringModel> clusteringModels,
-                                     ToDoubleFunction<CustomerClusteringModel> fieldGetter) {
-        return clusteringModels.parallelStream()
-                .mapToDouble(fieldGetter)
-                .max().orElseThrow(SelectionIsEmptyException::new);
-    }
-
-    private double findMinFieldValue(List<CustomerClusteringModel> clusteringModels,
-                                     ToDoubleFunction<CustomerClusteringModel> fieldGetter) {
-        return clusteringModels.parallelStream()
-                .mapToDouble(fieldGetter)
-                .min().orElseThrow(SelectionIsEmptyException::new);
-    }
-
-    private double calculateNormalizedValue(double baseValue, double min, double max) {
-        return (baseValue - min) / (max - min);
+    private double sqrDif(double value1, double value2) {
+        return Math.pow(value1 - value2, 2);
     }
 
 }
