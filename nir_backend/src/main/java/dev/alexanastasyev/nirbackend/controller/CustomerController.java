@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
@@ -35,9 +36,9 @@ public class CustomerController {
     }
 
     @GetMapping("/clusters")
-    public ResponseEntity<List<Set<Long>>> getCustomerIdsClusters() {
+    public ResponseEntity<List<Set<Long>>> getCustomerIdsClusters(@RequestParam double level) {
         try {
-            List<Set<Long>> clusters = customerService.getCustomerIdsClusters(1.1);
+            List<Set<Long>> clusters = customerService.getCustomerIdsClusters(level);
             return ResponseEntity.ok(clusters);
         } catch (IOException e) {
             return ResponseEntity.internalServerError().body(new ArrayList<>());
