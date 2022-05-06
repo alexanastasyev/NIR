@@ -1,10 +1,18 @@
 import React from "react";
 import axios from "axios";
+import {
+    BrowserRouter,
+    Routes,
+    Route,
+    Navigate
+} from "react-router-dom"
 
 import "./App.css";
 
 import Table from "../table/Table";
 import Clusters from "../clusters/Clusters";
+import Nav from "../nav/Nav";
+import Loading from "../loading/Loading";
 
 class App extends React.Component {
 
@@ -52,28 +60,29 @@ class App extends React.Component {
     render() {
         return (
             <div className="app">
-                {
-                    this.state.data ?
-                        <div>
-                            <Table data={this.state.data}/>
-                        </div>
-                        :
-                        <div>Loading data...</div>
-                }
+                <BrowserRouter>
+                    <Nav/>
+                    <Routes>
 
-                {
-                    this.state.clusters ?
-                        <div>
-                            <Clusters clusters={this.state.clusters}/>
-                        </div>
-                        :
-                        <div>Loading clusters...</div>
-                }
+                        <Route path="/" element={<Navigate to={"/data"}/>} />
+
+                        <Route path="/data" element={
+                            this.state.data ?
+                                <Table data={this.state.data}/> :
+                                <Loading/>
+                        }/>
+
+                        <Route path="/clusters" element={
+                            this.state.clusters ?
+                                <Clusters clusters={this.state.clusters}/> :
+                                <Loading/>
+                        }/>
+
+                    </Routes>
+                </BrowserRouter>
             </div>
-
         );
     }
-
 }
 
 export default App;
