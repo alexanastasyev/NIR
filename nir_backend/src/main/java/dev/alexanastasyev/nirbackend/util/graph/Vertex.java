@@ -1,5 +1,6 @@
 package dev.alexanastasyev.nirbackend.util.graph;
 
+@SuppressWarnings("unused")
 public class Vertex<T> {
 
     private final int index;

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.function.ToDoubleFunction;
 
 public class CustomerClusteringNormalizer {
+    private static final double CONST_VALUE = 0.0;
 
     @SuppressWarnings("DuplicatedCode")
     public static void normalizeCustomerModels(List<CustomerClusteringModel> clusteringModels) {
@@ -60,7 +61,7 @@ public class CustomerClusteringNormalizer {
 
     private static double calculateNormalizedValue(double baseValue, double min, double max) {
         if (max == min) {
-            return 0;
+            return CONST_VALUE;
         } else {
             return (baseValue - min) / (max - min);
         }

@@ -64,8 +64,7 @@ public class CustomerService {
             this.graph = graph;
         }
 
-        // TODO: return clone of this.graph
-        return this.graph;
+        return this.graph.copy();
     }
 
     private List<CustomerClusteringModel> getConvertedCustomerClusteringModels() throws IOException {
@@ -75,26 +74,26 @@ public class CustomerService {
 
     private double calculateDistance(CustomerClusteringModel model1, CustomerClusteringModel model2) {
         return Math.sqrt(sum(
-                sqrDif(model1.getBirthYear(), model2.getBirthYear()),
-                sqrDif(model1.getEducation(), model2.getEducation()),
-                sqrDif(model1.getMaritalStatus(), model2.getMaritalStatus()),
-                sqrDif(model1.getIncome(), model2.getIncome()),
-                sqrDif(model1.getChildrenAmount(), model2.getChildrenAmount()),
-                sqrDif(model1.getEnrollmentDate(), model2.getEnrollmentDate()),
-                sqrDif(model1.getRecency(), model2.getRecency()),
-                sqrDif(model1.getComplains(), model2.getComplains()),
-                sqrDif(model1.getWineAmount(), model2.getWineAmount()),
-                sqrDif(model1.getFishAmount(), model2.getFishAmount()),
-                sqrDif(model1.getMeatAmount(), model2.getMeatAmount()),
-                sqrDif(model1.getFishAmount(), model2.getFishAmount()),
-                sqrDif(model1.getSweetAmount(), model2.getSweetAmount()),
-                sqrDif(model1.getGoldAmount(), model2.getGoldAmount()),
-                sqrDif(model1.getDiscountPurchasesAmount(), model2.getDiscountPurchasesAmount()),
-                sqrDif(model1.getAcceptedCampaignsAmount(), model2.getAcceptedCampaignsAmount()),
-                sqrDif(model1.getWebPurchasesAmount(), model2.getWebPurchasesAmount()),
-                sqrDif(model1.getCatalogPurchasesAmount(), model2.getCatalogPurchasesAmount()),
-                sqrDif(model1.getStorePurchasesAmount(), model2.getStorePurchasesAmount()),
-                sqrDif(model1.getWebsiteVisitsAmount(), model2.getWebsiteVisitsAmount())
+                sqrDiff(model1.getBirthYear(), model2.getBirthYear()),
+                sqrDiff(model1.getEducation(), model2.getEducation()),
+                sqrDiff(model1.getMaritalStatus(), model2.getMaritalStatus()),
+                sqrDiff(model1.getIncome(), model2.getIncome()),
+                sqrDiff(model1.getChildrenAmount(), model2.getChildrenAmount()),
+                sqrDiff(model1.getEnrollmentDate(), model2.getEnrollmentDate()),
+                sqrDiff(model1.getRecency(), model2.getRecency()),
+                sqrDiff(model1.getComplains(), model2.getComplains()),
+                sqrDiff(model1.getWineAmount(), model2.getWineAmount()),
+                sqrDiff(model1.getFishAmount(), model2.getFishAmount()),
+                sqrDiff(model1.getMeatAmount(), model2.getMeatAmount()),
+                sqrDiff(model1.getFishAmount(), model2.getFishAmount()),
+                sqrDiff(model1.getSweetAmount(), model2.getSweetAmount()),
+                sqrDiff(model1.getGoldAmount(), model2.getGoldAmount()),
+                sqrDiff(model1.getDiscountPurchasesAmount(), model2.getDiscountPurchasesAmount()),
+                sqrDiff(model1.getAcceptedCampaignsAmount(), model2.getAcceptedCampaignsAmount()),
+                sqrDiff(model1.getWebPurchasesAmount(), model2.getWebPurchasesAmount()),
+                sqrDiff(model1.getCatalogPurchasesAmount(), model2.getCatalogPurchasesAmount()),
+                sqrDiff(model1.getStorePurchasesAmount(), model2.getStorePurchasesAmount()),
+                sqrDiff(model1.getWebsiteVisitsAmount(), model2.getWebsiteVisitsAmount())
         ));
     }
 
@@ -102,7 +101,7 @@ public class CustomerService {
         return Arrays.stream(values).sum();
     }
 
-    private double sqrDif(double value1, double value2) {
+    private double sqrDiff(double value1, double value2) {
         return Math.pow(value1 - value2, 2);
     }
 

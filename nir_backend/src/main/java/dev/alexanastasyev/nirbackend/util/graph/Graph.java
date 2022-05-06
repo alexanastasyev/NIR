@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@SuppressWarnings({"UnusedReturnValue", "unused"})
 public class Graph<T> {
 
     private final List<Vertex<T>> vertices;
@@ -70,6 +71,13 @@ public class Graph<T> {
 
     public boolean removeEdge(Edge<T> edge) {
         return this.edges.remove(edge);
+    }
+
+    public Graph<T> copy() {
+        Graph<T> graph = new Graph<>();
+        this.vertices.forEach(graph::addVertex);
+        this.edges.forEach(graph::addEdge);
+        return graph;
     }
 
     private boolean vertexExists(Vertex<T> vertex) {
