@@ -10,9 +10,9 @@ import {
 import "./App.css";
 
 import Table from "../table/Table";
-import Clusters from "../clusters/Clusters";
 import Nav from "../nav/Nav";
 import Loading from "../loading/Loading";
+import Layers from "../layers/Layers";
 
 class App extends React.Component {
 
@@ -21,7 +21,8 @@ class App extends React.Component {
 
         this.state = {
             data: "",
-            clusters: ""
+            layers: [],
+            layersLoaded: false
         }
 
         this.loadData = this.loadData.bind(this);
@@ -40,21 +41,32 @@ class App extends React.Component {
                 if (response.status === 200) {
                     this.setState({
                         data: response.data
-                    })
+                    });
                 }
             });
     }
 
     loadClusters() {
-        axios.get("http://localhost:8080/api/customers/clusters?level=1.5")
-            .then(response => {
-                console.log(response);
-                if (response.status === 200) {
-                    this.setState({
-                        clusters: response.data
-                    });
-                }
-            });
+        const levels = [0, 0.5, 1, 1.25, 1.5, 2, 3];
+
+        levels.forEach((level, index) => {
+            axios.get("http://localhost:8080/api/customers/clusters?level=" + level)
+                .then(response => {
+                    console.log(response);
+                    if (response.status === 200) {
+                        let newLayers = this.state.layers;
+                        newLayers[index] = response.data;
+                        this.setState({
+                            layers: newLayers
+                        });
+                        if (index === levels.length - 1) {
+                            this.setState({
+                                layersLoaded: true
+                            });
+                        }
+                    }
+                });
+        });
     }
 
     render() {
@@ -73,8 +85,8 @@ class App extends React.Component {
                         }/>
 
                         <Route path="/clusters" element={
-                            this.state.clusters ?
-                                <Clusters clusters={this.state.clusters}/> :
+                            this.state.layersLoaded ?
+                                <Layers layers={this.state.layers}/> :
                                 <Loading/>
                         }/>
 

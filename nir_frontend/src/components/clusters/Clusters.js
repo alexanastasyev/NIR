@@ -40,14 +40,21 @@ class Clusters extends React.Component {
                     options={options}
                 />
                 &emsp;
-                {this.state.clusters.map(cluster =>
-                    <div className={"cluster"}>
-                        [{cluster.map(item =>
-                            <span>{item},&emsp;</span>
-                        )}]
-                    </div>
-                )}
 
+                <table>
+                    <tbody>
+                        {this.state.clusters.map((cluster, index) =>
+                            <tr>
+                                <td className={"cluster-table-item"}>{index}</td>
+                                <td className={"cluster-table-item"}>
+                                    {cluster.map(item =>
+                                        <span>{item},&emsp;</span>
+                                    )}
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
             </div>
         )
     }
