@@ -46,7 +46,7 @@ class App extends React.Component {
     }
 
     loadClusters() {
-        axios.get("http://localhost:8080/api/customers/clusters?level=1.1")
+        axios.get("http://localhost:8080/api/customers/clusters?level=1.5")
             .then(response => {
                 console.log(response);
                 if (response.status === 200) {
