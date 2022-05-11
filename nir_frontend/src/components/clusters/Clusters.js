@@ -43,12 +43,12 @@ class Clusters extends React.Component {
 
                 <table>
                     <tbody>
-                        {this.state.clusters.map((cluster, index) =>
-                            <tr>
-                                <td className={"cluster-table-item"}>{index}</td>
+                        {this.state.clusters.map((cluster, clusterIndex) =>
+                            <tr key={clusterIndex}>
+                                <td className={"cluster-table-item"}>{clusterIndex}</td>
                                 <td className={"cluster-table-item"}>
-                                    {cluster.map(item =>
-                                        <span>{item},&emsp;</span>
+                                    {cluster.map((item, itemIndex) =>
+                                        <span key={itemIndex}>{item}{itemIndex < cluster.length - 1 ? ",\t" : ""}</span>
                                     )}
                                 </td>
                             </tr>

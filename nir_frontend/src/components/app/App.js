@@ -1,5 +1,7 @@
 import React from "react";
 import axios from "axios";
+
+// noinspection ES6CheckImport
 import {
     BrowserRouter,
     Routes,
@@ -37,7 +39,6 @@ class App extends React.Component {
     loadData() {
         axios.get("http://localhost:8080/api/customers/data")
             .then(response => {
-                console.log(response);
                 if (response.status === 200) {
                     this.setState({
                         data: response.data
@@ -52,7 +53,6 @@ class App extends React.Component {
         levels.forEach((level, index) => {
             axios.get("http://localhost:8080/api/customers/clusters?level=" + level)
                 .then(response => {
-                    console.log(response);
                     if (response.status === 200) {
                         let newLayers = this.state.layers;
                         newLayers[index] = response.data;
