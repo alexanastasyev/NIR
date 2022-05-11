@@ -39,7 +39,7 @@ public class CustomerRepository {
         for (CustomerCSVModel customerCSVModel : csv) {
             csvModels.add(customerCSVModel);
         }
-        csvModels.remove(0);
+        csvModels.remove(0); // Removes header row
 
         this.csvModels = csvModels;
     }

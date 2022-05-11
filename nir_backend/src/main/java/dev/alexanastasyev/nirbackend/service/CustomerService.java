@@ -40,7 +40,7 @@ public class CustomerService {
         List<Set<CustomerClusteringModel>> modelClusters = graphUtil.getClustersFromGraph();
 
         List<Set<Long>> idClusters = new ArrayList<>();
-        modelClusters.forEach(cluster -> idClusters.add(cluster.stream()
+        modelClusters.forEach(cluster -> idClusters.add(cluster.parallelStream()
                 .map(CustomerClusteringModel::getId)
                 .collect(Collectors.toSet())
         ));
