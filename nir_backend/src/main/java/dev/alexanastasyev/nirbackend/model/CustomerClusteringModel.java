@@ -9,7 +9,7 @@ public class CustomerClusteringModel {
     /**
      * Идентификатор
      */
-    private long id;
+    private final long id;
 
     /**
      * Год рождения
@@ -180,12 +180,32 @@ public class CustomerClusteringModel {
 
     }
 
-    public long getId() {
-        return id;
+    public CustomerClusteringModel(CustomerClusteringModel clusteringModel) {
+        this.id = clusteringModel.getId();
+        this.birthYear = clusteringModel.getBirthYear();
+        this.education = clusteringModel.getEducation();
+        this.maritalStatus = clusteringModel.getMaritalStatus();
+        this.income = clusteringModel.getIncome();
+        this.childrenAmount = clusteringModel.getChildrenAmount();
+        this.enrollmentDate = clusteringModel.getEnrollmentDate();
+        this.recency = clusteringModel.getRecency();
+        this.complains = clusteringModel.getComplains();
+        this.wineAmount = clusteringModel.getWineAmount();
+        this.fruitsAmount = clusteringModel.getFruitsAmount();
+        this.meatAmount = clusteringModel.getMeatAmount();
+        this.fishAmount = clusteringModel.getFishAmount();
+        this.sweetAmount = clusteringModel.getSweetAmount();
+        this.goldAmount = clusteringModel.getGoldAmount();
+        this.discountPurchasesAmount = clusteringModel.getDiscountPurchasesAmount();
+        this.acceptedCampaignsAmount = clusteringModel.getAcceptedCampaignsAmount();
+        this.webPurchasesAmount = clusteringModel.getWebPurchasesAmount();
+        this.catalogPurchasesAmount = clusteringModel.getCatalogPurchasesAmount();
+        this.storePurchasesAmount = clusteringModel.getStorePurchasesAmount();
+        this.websiteVisitsAmount = clusteringModel.getWebsiteVisitsAmount();
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public long getId() {
+        return id;
     }
 
     public double getBirthYear() {
@@ -386,5 +406,9 @@ public class CustomerClusteringModel {
     @Override
     public int hashCode() {
         return Objects.hash(id, birthYear, education, maritalStatus, income, childrenAmount, enrollmentDate, recency, complains, wineAmount, fruitsAmount, meatAmount, fishAmount, sweetAmount, goldAmount, discountPurchasesAmount, acceptedCampaignsAmount, webPurchasesAmount, catalogPurchasesAmount, storePurchasesAmount, websiteVisitsAmount);
+    }
+
+    public CustomerClusteringModel copy() {
+        return new CustomerClusteringModel(this);
     }
 }

@@ -7,33 +7,38 @@ import dev.alexanastasyev.nirbackend.util.lambda.DoubleSetter;
 
 import java.util.List;
 import java.util.function.ToDoubleFunction;
+import java.util.stream.Collectors;
 
 public class CustomerClusteringNormalizer {
     private static final double CONST_VALUE = 0.0;
 
     @SuppressWarnings("DuplicatedCode")
     public static void normalizeCustomerModels(List<CustomerClusteringModel> clusteringModels) {
+        List<CustomerClusteringModel> clusteringModelsCopy = clusteringModels.parallelStream()
+                .map(CustomerClusteringModel::copy)
+                .collect(Collectors.toList());
+
         clusteringModels.parallelStream().forEach(model -> {
-            normalizeField(clusteringModels, CustomerClusteringModel::getBirthYear, model::getBirthYear, model::setBirthYear);
-            normalizeField(clusteringModels, CustomerClusteringModel::getEducation, model::getEducation, model::setEducation);
-            normalizeField(clusteringModels, CustomerClusteringModel::getMaritalStatus, model::getMaritalStatus, model::setMaritalStatus);
-            normalizeField(clusteringModels, CustomerClusteringModel::getIncome, model::getIncome, model::setIncome);
-            normalizeField(clusteringModels, CustomerClusteringModel::getChildrenAmount, model::getChildrenAmount, model::setChildrenAmount);
-            normalizeField(clusteringModels, CustomerClusteringModel::getEnrollmentDate, model::getEnrollmentDate, model::setEnrollmentDate);
-            normalizeField(clusteringModels, CustomerClusteringModel::getRecency, model::getRecency, model::setRecency);
-            normalizeField(clusteringModels, CustomerClusteringModel::getComplains, model::getComplains, model::setComplains);
-            normalizeField(clusteringModels, CustomerClusteringModel::getWineAmount, model::getWineAmount, model::setWineAmount);
-            normalizeField(clusteringModels, CustomerClusteringModel::getFruitsAmount, model::getFruitsAmount, model::setFruitsAmount);
-            normalizeField(clusteringModels, CustomerClusteringModel::getMeatAmount, model::getMeatAmount, model::setMeatAmount);
-            normalizeField(clusteringModels, CustomerClusteringModel::getFishAmount, model::getFishAmount, model::setFishAmount);
-            normalizeField(clusteringModels, CustomerClusteringModel::getSweetAmount, model::getSweetAmount, model::setSweetAmount);
-            normalizeField(clusteringModels, CustomerClusteringModel::getGoldAmount, model::getGoldAmount, model::setGoldAmount);
-            normalizeField(clusteringModels, CustomerClusteringModel::getDiscountPurchasesAmount, model::getDiscountPurchasesAmount, model::setDiscountPurchasesAmount);
-            normalizeField(clusteringModels, CustomerClusteringModel::getAcceptedCampaignsAmount, model::getAcceptedCampaignsAmount, model::setAcceptedCampaignsAmount);
-            normalizeField(clusteringModels, CustomerClusteringModel::getWebPurchasesAmount, model::getWebPurchasesAmount, model::setWebPurchasesAmount);
-            normalizeField(clusteringModels, CustomerClusteringModel::getCatalogPurchasesAmount, model::getCatalogPurchasesAmount, model::setCatalogPurchasesAmount);
-            normalizeField(clusteringModels, CustomerClusteringModel::getStorePurchasesAmount, model::getStorePurchasesAmount, model::setStorePurchasesAmount);
-            normalizeField(clusteringModels, CustomerClusteringModel::getWebsiteVisitsAmount, model::getWebsiteVisitsAmount, model::setWebsiteVisitsAmount);
+            normalizeField(clusteringModelsCopy, CustomerClusteringModel::getBirthYear, model::getBirthYear, model::setBirthYear);
+            normalizeField(clusteringModelsCopy, CustomerClusteringModel::getEducation, model::getEducation, model::setEducation);
+            normalizeField(clusteringModelsCopy, CustomerClusteringModel::getMaritalStatus, model::getMaritalStatus, model::setMaritalStatus);
+            normalizeField(clusteringModelsCopy, CustomerClusteringModel::getIncome, model::getIncome, model::setIncome);
+            normalizeField(clusteringModelsCopy, CustomerClusteringModel::getChildrenAmount, model::getChildrenAmount, model::setChildrenAmount);
+            normalizeField(clusteringModelsCopy, CustomerClusteringModel::getEnrollmentDate, model::getEnrollmentDate, model::setEnrollmentDate);
+            normalizeField(clusteringModelsCopy, CustomerClusteringModel::getRecency, model::getRecency, model::setRecency);
+            normalizeField(clusteringModelsCopy, CustomerClusteringModel::getComplains, model::getComplains, model::setComplains);
+            normalizeField(clusteringModelsCopy, CustomerClusteringModel::getWineAmount, model::getWineAmount, model::setWineAmount);
+            normalizeField(clusteringModelsCopy, CustomerClusteringModel::getFruitsAmount, model::getFruitsAmount, model::setFruitsAmount);
+            normalizeField(clusteringModelsCopy, CustomerClusteringModel::getMeatAmount, model::getMeatAmount, model::setMeatAmount);
+            normalizeField(clusteringModelsCopy, CustomerClusteringModel::getFishAmount, model::getFishAmount, model::setFishAmount);
+            normalizeField(clusteringModelsCopy, CustomerClusteringModel::getSweetAmount, model::getSweetAmount, model::setSweetAmount);
+            normalizeField(clusteringModelsCopy, CustomerClusteringModel::getGoldAmount, model::getGoldAmount, model::setGoldAmount);
+            normalizeField(clusteringModelsCopy, CustomerClusteringModel::getDiscountPurchasesAmount, model::getDiscountPurchasesAmount, model::setDiscountPurchasesAmount);
+            normalizeField(clusteringModelsCopy, CustomerClusteringModel::getAcceptedCampaignsAmount, model::getAcceptedCampaignsAmount, model::setAcceptedCampaignsAmount);
+            normalizeField(clusteringModelsCopy, CustomerClusteringModel::getWebPurchasesAmount, model::getWebPurchasesAmount, model::setWebPurchasesAmount);
+            normalizeField(clusteringModelsCopy, CustomerClusteringModel::getCatalogPurchasesAmount, model::getCatalogPurchasesAmount, model::setCatalogPurchasesAmount);
+            normalizeField(clusteringModelsCopy, CustomerClusteringModel::getStorePurchasesAmount, model::getStorePurchasesAmount, model::setStorePurchasesAmount);
+            normalizeField(clusteringModelsCopy, CustomerClusteringModel::getWebsiteVisitsAmount, model::getWebsiteVisitsAmount, model::setWebsiteVisitsAmount);
         });
     }
 
