@@ -48,11 +48,14 @@ class App extends React.Component {
     }
 
     loadClusters() {
-        const levels = [0, 0.5, 1, 1.25, 1.5, 2, 3];
+        const levels = [0, 0.5, 1, 1.25, 1.5, 2];
+
+        const start = new Date();
 
         levels.forEach((level, index) => {
             axios.get("http://localhost:8080/api/customers/clusters?level=" + level)
                 .then(response => {
+                    console.log(response);
                     if (response.status === 200) {
                         let newLayers = this.state.layers;
                         newLayers[index] = response.data;
@@ -63,10 +66,15 @@ class App extends React.Component {
                             this.setState({
                                 layersLoaded: true
                             });
+
+                            const end = new Date();
+                            console.log(end - start + " ms");
                         }
                     }
-                });
+                })
+                .catch(error => console.log(error));
         });
+
     }
 
     render() {
