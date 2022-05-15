@@ -36,8 +36,16 @@ public class CustomerService {
         Graph<CustomerClusteringModel> graph = getCustomerClusteringModelsGraph();
 
         GraphClusteringUtil<CustomerClusteringModel> graphUtil = new GraphClusteringUtil<>(graph);
+
+        long removeEdgesStart = System.currentTimeMillis();
         graphUtil.removeLongEdges(level);
+        long removeEdgesEnd = System.currentTimeMillis();
+        System.out.println("Removing edges: " + (removeEdgesEnd - removeEdgesStart) + " ms");
+
+        long clusteringStart = System.currentTimeMillis();
         List<Set<CustomerClusteringModel>> modelClusters = graphUtil.getClustersFromGraph();
+        long clusteringEnd = System.currentTimeMillis();
+        System.out.println("Clustering: " + (clusteringEnd - clusteringStart) + " ms");
 
         List<Set<Long>> idClusters = new ArrayList<>();
         modelClusters.forEach(cluster -> idClusters.add(cluster.parallelStream()
@@ -50,6 +58,8 @@ public class CustomerService {
 
     private Graph<CustomerClusteringModel> getCustomerClusteringModelsGraph() throws IOException {
         if (this.graph == null) {
+            long startTime = System.currentTimeMillis();
+
             Graph<CustomerClusteringModel> graph = new Graph<>();
             getConvertedCustomerClusteringModels().forEach(graph::addVertex);
 
@@ -61,6 +71,11 @@ public class CustomerService {
                     graph.addEdge(vertexFrom, vertexTo, distance);
                 }
             }
+
+            long endTime = System.currentTimeMillis();
+
+            System.out.println("Graph initialization: " + (endTime - startTime) + " ms");
+
             this.graph = graph;
         }
 

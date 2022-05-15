@@ -12,7 +12,7 @@ public class CustomerCSVToClusteringConverter {
         List<CustomerClusteringModel> clusteringModels = csvModels.parallelStream()
                 .filter(CustomerCSVModel::hasNoEmptyFields)
                 .map(CustomerClusteringModel::new)
-                .limit(100)
+                .limit(500)
                 .collect(Collectors.toList());
         CustomerClusteringNormalizer.normalizeCustomerModels(clusteringModels);
         return clusteringModels;
