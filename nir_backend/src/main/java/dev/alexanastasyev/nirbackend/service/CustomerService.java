@@ -4,9 +4,7 @@ import dev.alexanastasyev.nirbackend.model.CustomerCSVModel;
 import dev.alexanastasyev.nirbackend.model.CustomerClusteringModel;
 import dev.alexanastasyev.nirbackend.repository.CustomerRepository;
 import dev.alexanastasyev.nirbackend.util.clustering.CustomerCSVToClusteringConverter;
-import dev.alexanastasyev.nirbackend.util.clustering.GraphClusteringUtil;
-import dev.alexanastasyev.nirbackend.util.graph.Graph;
-import dev.alexanastasyev.nirbackend.util.graph.Vertex;
+import dev.alexanastasyev.nirbackend.util.clustering.AdjustmentMatrix;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,65 +19,50 @@ import java.util.stream.Collectors;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
-    private Graph<CustomerClusteringModel> graph;
 
     @Autowired
     public CustomerService(CustomerRepository customerRepository) {
         this.customerRepository = customerRepository;
     }
 
-    public List<CustomerClusteringModel> getCustomerClusteringModels() throws IOException {
-        return getConvertedCustomerClusteringModels();
+    public List<CustomerCSVModel> getCustomerCsvModels() throws IOException {
+        return customerRepository.getCustomerCsvModels().stream()
+                .filter(CustomerCSVModel::hasNoEmptyFields)
+                .collect(Collectors.toList());
     }
 
     public List<Set<Long>> getCustomerIdsClusters(double level) throws IOException {
-        Graph<CustomerClusteringModel> graph = getCustomerClusteringModelsGraph();
+        AdjustmentMatrix adjustmentMatrix = getAdjustmentMatrix();
 
-        GraphClusteringUtil<CustomerClusteringModel> graphUtil = new GraphClusteringUtil<>(graph);
+        adjustmentMatrix.removeEdges(level);
+        List<Set<Integer>> indexClusters = adjustmentMatrix.getClusters();
 
-        long removeEdgesStart = System.currentTimeMillis();
-        graphUtil.removeLongEdges(level);
-        long removeEdgesEnd = System.currentTimeMillis();
-        System.out.println("Removing edges: " + (removeEdgesEnd - removeEdgesStart) + " ms");
+        List<Set<Long>> idsClusters = new ArrayList<>();
+        List<CustomerClusteringModel> customerClusteringModels = getConvertedCustomerClusteringModels();
+        indexClusters.forEach(cluster ->
+                idsClusters.add(
+                        cluster.stream().map(index ->
+                                customerClusteringModels.get(index).getId()
+                        ).collect(Collectors.toSet())
+                )
+        );
 
-        long clusteringStart = System.currentTimeMillis();
-        List<Set<CustomerClusteringModel>> modelClusters = graphUtil.getClustersFromGraph();
-        long clusteringEnd = System.currentTimeMillis();
-        System.out.println("Clustering: " + (clusteringEnd - clusteringStart) + " ms");
-
-        List<Set<Long>> idClusters = new ArrayList<>();
-        modelClusters.forEach(cluster -> idClusters.add(cluster.parallelStream()
-                .map(CustomerClusteringModel::getId)
-                .collect(Collectors.toSet())
-        ));
-
-        return idClusters;
+        return idsClusters;
     }
 
-    private Graph<CustomerClusteringModel> getCustomerClusteringModelsGraph() throws IOException {
-        if (this.graph == null) {
-            long startTime = System.currentTimeMillis();
+    private AdjustmentMatrix getAdjustmentMatrix() throws IOException {
+        AdjustmentMatrix adjustmentMatrix = new AdjustmentMatrix(getConvertedCustomerClusteringModels().size());
 
-            Graph<CustomerClusteringModel> graph = new Graph<>();
-            getConvertedCustomerClusteringModels().forEach(graph::addVertex);
+        List<CustomerClusteringModel> clusteringModels = getConvertedCustomerClusteringModels();
 
-            for (int i = 0; i < graph.getVertices().size() - 1; i++) {
-                for (int j = i + 1; j < graph.getVertices().size(); j++) {
-                    Vertex<CustomerClusteringModel> vertexFrom = graph.getVertices().get(i);
-                    Vertex<CustomerClusteringModel> vertexTo = graph.getVertices().get(j);
-                    double distance = calculateDistance(vertexFrom.getValue(), vertexTo.getValue());
-                    graph.addEdge(vertexFrom, vertexTo, distance);
-                }
+        for (int i = 0; i < clusteringModels.size() - 1; i++) {
+            for (int j = i + 1; j < clusteringModels.size(); j++) {
+                double distance = calculateDistance(clusteringModels.get(i), clusteringModels.get(j));
+                adjustmentMatrix.addDistance(i, j, distance);
             }
-
-            long endTime = System.currentTimeMillis();
-
-            System.out.println("Graph initialization: " + (endTime - startTime) + " ms");
-
-            this.graph = graph;
         }
 
-        return this.graph.copy();
+        return adjustmentMatrix;
     }
 
     private List<CustomerClusteringModel> getConvertedCustomerClusteringModels() throws IOException {
