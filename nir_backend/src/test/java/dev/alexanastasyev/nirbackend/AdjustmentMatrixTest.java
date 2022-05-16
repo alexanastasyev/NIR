@@ -46,7 +46,7 @@ public class AdjustmentMatrixTest {
         adjustmentMatrix.addDistance(2, 4, 1);
         adjustmentMatrix.addDistance(3, 4, 1);
 
-        List<Set<Integer>> clusters = adjustmentMatrix.getClusters();
+        List<Set<Integer>> clusters = adjustmentMatrix.getClusters(2);
         Assertions.assertEquals(3, clusters.size());
         Assertions.assertEquals(4, clusters.get(0).size());
         Assertions.assertEquals(2, clusters.get(1).size());
@@ -67,7 +67,7 @@ public class AdjustmentMatrixTest {
         adjustmentMatrix.addDistance(4, 6, 1);
         adjustmentMatrix.addDistance(5, 6, 1);
 
-        List<Set<Integer>> clusters = adjustmentMatrix.getClusters();
+        List<Set<Integer>> clusters = adjustmentMatrix.getClusters(2);
         Assertions.assertEquals(2, clusters.size());
         Assertions.assertEquals(3, clusters.get(0).size());
         Assertions.assertEquals(4, clusters.get(1).size());
@@ -76,7 +76,7 @@ public class AdjustmentMatrixTest {
     @Test
     public void testClustersNoConnections() {
         AdjustmentMatrix adjustmentMatrix = new AdjustmentMatrix(100);
-        List<Set<Integer>> clusters = adjustmentMatrix.getClusters();
+        List<Set<Integer>> clusters = adjustmentMatrix.getClusters(2);
         Assertions.assertEquals(100, clusters.size());
     }
 
@@ -89,7 +89,7 @@ public class AdjustmentMatrixTest {
         adjustmentMatrix.addDistance(2, 4, 1);
         adjustmentMatrix.addDistance(4, 3, 1);
 
-        List<Set<Integer>> clusters = adjustmentMatrix.getClusters();
+        List<Set<Integer>> clusters = adjustmentMatrix.getClusters(2);
         Assertions.assertEquals(1, clusters.size());
     }
 
@@ -111,7 +111,7 @@ public class AdjustmentMatrixTest {
         adjustmentMatrix.addDistance(2, 4, 10);
         adjustmentMatrix.addDistance(4, 3, 20);
 
-        adjustmentMatrix.removeEdges(15);
+        adjustmentMatrix.getClusters(15);
 
         double[][] matrix = adjustmentMatrix.getMatrix();
 

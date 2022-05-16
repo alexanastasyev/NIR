@@ -42,8 +42,13 @@ class Table extends React.Component {
                 sortable: true
             },
             {
-                name: "Children",
-                selector: row => row.childrenAmount,
+                name: "Kids",
+                selector: row => row.kidsAmount,
+                sortable: true
+            },
+            {
+                name: "Teens",
+                selector: row => row.teensAmount,
                 sortable: true
             },
             {
@@ -97,8 +102,33 @@ class Table extends React.Component {
                 sortable: true
             },
             {
-                name: "Campaigns",
-                selector: row => row.acceptedCampaignsAmount,
+                name: "Campaign 1",
+                selector: row => row.acceptedCampaign1,
+                sortable: true
+            },
+            {
+                name: "Campaign 2",
+                selector: row => row.acceptedCampaign2,
+                sortable: true
+            },
+            {
+                name: "Campaign 3",
+                selector: row => row.acceptedCampaign3,
+                sortable: true
+            },
+            {
+                name: "Campaign 4",
+                selector: row => row.acceptedCampaign4,
+                sortable: true
+            },
+            {
+                name: "Campaign 5",
+                selector: row => row.acceptedCampaign5,
+                sortable: true
+            },
+            {
+                name: "Last campaign",
+                selector: row => row.response,
                 sortable: true
             },
             {
@@ -117,8 +147,8 @@ class Table extends React.Component {
                 sortable: true
             },
             {
-                name: "Web site visits",
-                selector: row => row.websiteVisitsAmount,
+                name: "Website visits",
+                selector: row => row.visitsAmount,
                 sortable: true
             }
         ];

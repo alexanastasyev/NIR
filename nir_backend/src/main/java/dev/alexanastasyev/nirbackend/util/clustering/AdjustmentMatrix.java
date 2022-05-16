@@ -31,17 +31,9 @@ public class AdjustmentMatrix {
         this.matrix[indexTo][indexFrom] = distance;
     }
 
-    public void removeEdges(double level) {
-        for (int i = 0; i < this.matrix.length; i++) {
-            for (int j = 0; j < this.matrix[0].length; j++) {
-                if (this.matrix[i][j] > level) {
-                    this.matrix[i][j] = -1;
-                }
-            }
-        }
-    }
+    public List<Set<Integer>> getClusters(double level) {
+        this.removeEdges(level);
 
-    public List<Set<Integer>> getClusters() {
         Set<Integer> visited = new HashSet<>();
 
         List<Set<Integer>> result = new ArrayList<>();
@@ -93,5 +85,15 @@ public class AdjustmentMatrix {
             }
         }
         return added;
+    }
+
+    private void removeEdges(double level) {
+        for (int i = 0; i < this.matrix.length; i++) {
+            for (int j = 0; j < this.matrix[0].length; j++) {
+                if (this.matrix[i][j] > level) {
+                    this.matrix[i][j] = -1;
+                }
+            }
+        }
     }
 }

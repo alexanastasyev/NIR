@@ -34,17 +34,16 @@ public class CustomerService {
     public List<Set<Long>> getCustomerIdsClusters(double level) throws IOException {
         AdjustmentMatrix adjustmentMatrix = getAdjustmentMatrix();
 
-        adjustmentMatrix.removeEdges(level);
-        List<Set<Integer>> indexClusters = adjustmentMatrix.getClusters();
+        List<Set<Integer>> indexClusters = adjustmentMatrix.getClusters(level);
 
         List<Set<Long>> idsClusters = new ArrayList<>();
         List<CustomerClusteringModel> customerClusteringModels = getConvertedCustomerClusteringModels();
         indexClusters.forEach(cluster ->
-                idsClusters.add(
-                        cluster.stream().map(index ->
-                                customerClusteringModels.get(index).getId()
-                        ).collect(Collectors.toSet())
-                )
+            idsClusters.add(
+                cluster.stream().map(index ->
+                    customerClusteringModels.get(index).getId()
+                ).collect(Collectors.toSet())
+            )
         );
 
         return idsClusters;
