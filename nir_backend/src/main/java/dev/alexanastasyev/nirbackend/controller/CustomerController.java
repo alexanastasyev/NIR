@@ -1,5 +1,6 @@
 package dev.alexanastasyev.nirbackend.controller;
 
+import dev.alexanastasyev.nirbackend.model.CustomerCSVModel;
 import dev.alexanastasyev.nirbackend.model.CustomerClusteringModel;
 import dev.alexanastasyev.nirbackend.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,10 +27,10 @@ public class CustomerController {
     }
 
     @GetMapping("/data")
-    public ResponseEntity<List<CustomerClusteringModel>> getCustomerModels() {
+    public ResponseEntity<List<CustomerCSVModel>> getCustomerModels() {
         try {
-            List<CustomerClusteringModel> clusteringModels = customerService.getCustomerClusteringModels();
-            return ResponseEntity.ok(clusteringModels);
+            List<CustomerCSVModel> csvModels = customerService.getCustomerCsvModels();
+            return ResponseEntity.ok(csvModels);
         } catch (IOException e) {
             return ResponseEntity.internalServerError().body(new ArrayList<>());
         }
