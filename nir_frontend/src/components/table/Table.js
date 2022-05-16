@@ -18,12 +18,12 @@ class Table extends React.Component {
         const columns = [
             {
                 name: "ID",
-                selector: row => row.id,
+                selector: row => Number(row.id),
                 sortable: true
             },
             {
                 name: "Birth year",
-                selector: row => row.birthYear,
+                selector: row => Number(row.birthYear),
                 sortable: true
             },
             {
@@ -38,117 +38,120 @@ class Table extends React.Component {
             },
             {
                 name: "Income",
-                selector: row => row.income,
+                selector: row => Number(row.income),
                 sortable: true
             },
             {
                 name: "Kids",
-                selector: row => row.kidsAmount,
+                selector: row => Number(row.kidsAmount),
                 sortable: true
             },
             {
                 name: "Teens",
-                selector: row => row.teensAmount,
+                selector: row => Number(row.teensAmount),
                 sortable: true
             },
             {
                 name: "Date of enrollment",
-                selector: row => row.enrollmentDate,
+                selector: row => {
+                    let dateItems = row.enrollmentDate.split("-");
+                    return dateItems[2] + "-" + dateItems[1] + "-" + dateItems[0];
+                },
                 sortable: true
             },
             {
                 name: "Recency",
-                selector: row => row.recency,
+                selector: row => Number(row.recency),
                 sortable: true
             },
             {
                 name: "Complains",
-                selector: row => row.complains,
+                selector: row => Number(row.complains),
                 sortable: true
             },
             {
                 name: "Wine bought",
-                selector: row => row.wineAmount,
+                selector: row => Number(row.wineAmount),
                 sortable: true
             },
             {
                 name: "Fruits bought",
-                selector: row => row.fruitsAmount,
+                selector: row => Number(row.fruitsAmount),
                 sortable: true
             },
             {
                 name: "Meat bought",
-                selector: row => row.meatAmount,
+                selector: row => Number(row.meatAmount),
                 sortable: true
             },
             {
                 name: "Fish bought",
-                selector: row => row.fishAmount,
+                selector: row => Number(row.fishAmount),
                 sortable: true
             },
             {
                 name: "Sweet bought",
-                selector: row => row.sweetAmount,
+                selector: row => Number(row.sweetAmount),
                 sortable: true
             },
             {
                 name: "Gold bought",
-                selector: row => row.goldAmount,
+                selector: row => Number(row.goldAmount),
                 sortable: true
             },
             {
                 name: "Discount purchases",
-                selector: row => row.discountPurchasesAmount,
+                selector: row => Number(row.discountPurchasesAmount),
                 sortable: true
             },
             {
                 name: "Campaign 1",
-                selector: row => row.acceptedCampaign1,
+                selector: row => Number(row.acceptedCampaign1),
                 sortable: true
             },
             {
                 name: "Campaign 2",
-                selector: row => row.acceptedCampaign2,
+                selector: row => Number(row.acceptedCampaign2),
                 sortable: true
             },
             {
                 name: "Campaign 3",
-                selector: row => row.acceptedCampaign3,
+                selector: row => Number(row.acceptedCampaign3),
                 sortable: true
             },
             {
                 name: "Campaign 4",
-                selector: row => row.acceptedCampaign4,
+                selector: row => Number(row.acceptedCampaign4),
                 sortable: true
             },
             {
                 name: "Campaign 5",
-                selector: row => row.acceptedCampaign5,
+                selector: row => Number(row.acceptedCampaign5),
                 sortable: true
             },
             {
                 name: "Last campaign",
-                selector: row => row.response,
+                selector: row => Number(row.response),
                 sortable: true
             },
             {
                 name: "Web purchases",
-                selector: row => row.webPurchasesAmount,
+                selector: row => Number(row.webPurchasesAmount),
                 sortable: true
             },
             {
                 name: "Catalog purchases",
-                selector: row => row.catalogPurchasesAmount,
+                selector: row => Number(row.catalogPurchasesAmount),
                 sortable: true
             },
             {
                 name: "Store purchases",
-                selector: row => row.storePurchasesAmount,
+                selector: row => Number(row.storePurchasesAmount),
                 sortable: true
             },
             {
                 name: "Website visits",
-                selector: row => row.visitsAmount,
+                selector: row => Number(row.visitsAmount),
                 sortable: true
             }
         ];
