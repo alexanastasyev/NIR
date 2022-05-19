@@ -1,15 +1,20 @@
 package dev.alexanastasyev.nirbackend.model;
 
+import dev.alexanastasyev.nirbackend.util.lambda.DoubleGetter;
+import dev.alexanastasyev.nirbackend.util.lambda.DoubleSetter;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
 
 public class CustomerClusteringModel {
 
+    private static final int EMPTY_VALUE = -1;
+
     /**
      * Идентификатор
      */
-    private final long id;
+    private long id;
 
     /**
      * Год рождения
@@ -111,73 +116,33 @@ public class CustomerClusteringModel {
      */
     private double websiteVisitsAmount;
 
+    public CustomerClusteringModel() {
+    }
+
     public CustomerClusteringModel(CustomerCSVModel csvModel) {
-
-        this.id = Integer.parseInt(csvModel.getId());
-
-        this.birthYear = Double.parseDouble(csvModel.getBirthYear());
-
-        if ("Graduation".equals(csvModel.getEducation())) {
-            this.education = 0.5;
-        } else if ("Basic".equals(csvModel.getEducation()) || "2n Cycle".equals(csvModel.getEducation())) {
-            this.education = 0;
-        } else if ("Master".equals(csvModel.getEducation()) || "PhD".equals(csvModel.getEducation())) {
-            this.education = 1;
-        }
-
-        if ("YOLO".equals(csvModel.getMaritalStatus()) || "Absurd".equals(csvModel.getMaritalStatus())
-                || "Alone".equals(csvModel.getMaritalStatus()) || "Widow".equals(csvModel.getMaritalStatus())
-                || "Divorced".equals(csvModel.getMaritalStatus())) {
-            this.maritalStatus = 0;
-        } else if ("Together".equals(csvModel.getMaritalStatus()) || "Married".equals(csvModel.getMaritalStatus())) {
-            this.maritalStatus = 1;
-        }
-
-        this.income = Double.parseDouble(csvModel.getIncome());
-
-        this.childrenAmount = Double.parseDouble(csvModel.getKidsAmount()) + Double.parseDouble(csvModel.getTeensAmount());
-
-        try {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-            Date parsedDate = dateFormat.parse(csvModel.getEnrollmentDate());
-            this.enrollmentDate = parsedDate.getTime();
-        } catch (Exception e) {
-            this.enrollmentDate = 0.5; // Ситуация никогда не должна произойти
-        }
-
-        this.recency = Double.parseDouble(csvModel.getRecency());
-
-        this.complains = Double.parseDouble(csvModel.getComplains());
-
-        this.wineAmount = Double.parseDouble(csvModel.getWineAmount());
-
-        this.fruitsAmount = Double.parseDouble(csvModel.getFruitsAmount());
-
-        this.meatAmount = Double.parseDouble(csvModel.getMeatAmount());
-
-        this.fishAmount = Double.parseDouble(csvModel.getFishAmount());
-
-        this.sweetAmount = Double.parseDouble(csvModel.getSweetAmount());
-
-        this.goldAmount = Double.parseDouble(csvModel.getGoldAmount());
-
-        this.discountPurchasesAmount = Double.parseDouble(csvModel.getDiscountPurchasesAmount());
-
-        this.acceptedCampaignsAmount = Double.parseDouble(csvModel.getAcceptedCampaign1())
-                + Double.parseDouble(csvModel.getAcceptedCampaign2())
-                + Double.parseDouble(csvModel.getAcceptedCampaign3())
-                + Double.parseDouble(csvModel.getAcceptedCampaign4())
-                + Double.parseDouble(csvModel.getAcceptedCampaign5())
-                + Double.parseDouble(csvModel.getResponse());
-
-        this.webPurchasesAmount = Double.parseDouble(csvModel.getWebPurchasesAmount());
-
-        this.catalogPurchasesAmount = Double.parseDouble(csvModel.getCatalogPurchasesAmount());
-
-        this.storePurchasesAmount = Double.parseDouble(csvModel.getStorePurchasesAmount());
-
-        this.websiteVisitsAmount = Double.parseDouble(csvModel.getVisitsAmount());
-
+        extractId(csvModel.getId());
+        extractBirthYear(csvModel.getBirthYear());
+        extractEducation(csvModel.getEducation());
+        extractMaritalStatus(csvModel.getMaritalStatus());
+        extractIncome(csvModel.getIncome());
+        extractChildrenAmount(csvModel.getKidsAmount(), csvModel.getTeensAmount());
+        extractEnrollmentDate(csvModel.getEnrollmentDate());
+        extractRecency(csvModel.getRecency());
+        extractComplains(csvModel.getComplains());
+        extractWineAmount(csvModel.getWineAmount());
+        extractFruitsAmount(csvModel.getFruitsAmount());
+        extractMeatAmount(csvModel.getMeatAmount());
+        extractFishAmount(csvModel.getFishAmount());
+        extractSweetAmount(csvModel.getSweetAmount());
+        extractGoldAmount(csvModel.getGoldAmount());
+        extractDiscountPurchasesAmount(csvModel.getDiscountPurchasesAmount());
+        extractAcceptedCampaignsAmount(csvModel.getAcceptedCampaign1(), csvModel.getAcceptedCampaign2(),
+                csvModel.getAcceptedCampaign3(), csvModel.getAcceptedCampaign4(), csvModel.getAcceptedCampaign5(),
+                csvModel.getResponse());
+        extractWebPurchasesAmount(csvModel.getWebPurchasesAmount());
+        extractCatalogPurchasesAmount(csvModel.getCatalogPurchasesAmount());
+        extractStorePurchasesAmount(csvModel.getStorePurchasesAmount());
+        extractWebsiteVisitsAmount(csvModel.getVisitsAmount());
     }
 
     public CustomerClusteringModel(CustomerClusteringModel clusteringModel) {
@@ -410,5 +375,171 @@ public class CustomerClusteringModel {
 
     public CustomerClusteringModel copy() {
         return new CustomerClusteringModel(this);
+    }
+
+    public void replaceEmptyFieldsWithAverage(CustomerClusteringModel average) {
+        replaceIfEmpty(this::getBirthYear, this::setBirthYear, average.getBirthYear());
+        replaceIfEmpty(this::getEducation, this::setEducation, average.getEducation());
+        replaceIfEmpty(this::getMaritalStatus, this::setMaritalStatus, average.getMaritalStatus());
+        replaceIfEmpty(this::getIncome, this::setIncome, average.getIncome());
+        replaceIfEmpty(this::getChildrenAmount, this::setChildrenAmount, average.getChildrenAmount());
+        replaceIfEmpty(this::getEnrollmentDate, this::setEnrollmentDate, average.getEnrollmentDate());
+        replaceIfEmpty(this::getRecency, this::setRecency, average.getRecency());
+        replaceIfEmpty(this::getComplains, this::setComplains, average.getComplains());
+        replaceIfEmpty(this::getWineAmount, this::setWineAmount, average.getWineAmount());
+        replaceIfEmpty(this::getFruitsAmount, this::setFruitsAmount, average.getFruitsAmount());
+        replaceIfEmpty(this::getMeatAmount, this::setMeatAmount, average.getMeatAmount());
+        replaceIfEmpty(this::getFishAmount, this::setFishAmount, average.getFishAmount());
+        replaceIfEmpty(this::getSweetAmount, this::setSweetAmount, average.getSweetAmount());
+        replaceIfEmpty(this::getGoldAmount, this::setGoldAmount, average.getGoldAmount());
+        replaceIfEmpty(this::getDiscountPurchasesAmount, this::setDiscountPurchasesAmount, average.getDiscountPurchasesAmount());
+        replaceIfEmpty(this::getAcceptedCampaignsAmount, this::setAcceptedCampaignsAmount, average.getAcceptedCampaignsAmount());
+        replaceIfEmpty(this::getWebPurchasesAmount, this::setWebPurchasesAmount, average.getWebPurchasesAmount());
+        replaceIfEmpty(this::getCatalogPurchasesAmount, this::setCatalogPurchasesAmount, average.getCatalogPurchasesAmount());
+        replaceIfEmpty(this::getStorePurchasesAmount, this::setStorePurchasesAmount, average.getStorePurchasesAmount());
+        replaceIfEmpty(this::getWebsiteVisitsAmount, this::setWebsiteVisitsAmount, average.getWebsiteVisitsAmount());
+    }
+
+    private void replaceIfEmpty(DoubleGetter getter, DoubleSetter setter, double value) {
+        if (getter.getValue() == EMPTY_VALUE) {
+            setter.setValue(value);
+        }
+    }
+
+    private void extractId(String id) {
+        if (id == null || id.isEmpty()) {
+            this.id = EMPTY_VALUE;
+        } else {
+            this.id = Integer.parseInt(id);
+        }
+    }
+
+    private void extractBirthYear(String birthYear) {
+        extractDoubleValue(birthYear, this::setBirthYear);
+    }
+
+    private void extractEducation(String education) {
+        if ("Graduation".equals(education)) {
+            this.education = 0.5;
+        } else if ("Basic".equals(education) || "2n Cycle".equals(education)) {
+            this.education = 0;
+        } else if ("Master".equals(education) || "PhD".equals(education)) {
+            this.education = 1;
+        } else {
+            this.education = EMPTY_VALUE;
+        }
+    }
+
+    private void extractMaritalStatus(String maritalStatus) {
+        if ("YOLO".equals(maritalStatus) || "Absurd".equals(maritalStatus)
+                || "Alone".equals(maritalStatus) || "Widow".equals(maritalStatus)
+                || "Divorced".equals(maritalStatus)) {
+            this.maritalStatus = 0;
+        } else if ("Together".equals(maritalStatus) || "Married".equals(maritalStatus)) {
+            this.maritalStatus = 1;
+        } else {
+            this.maritalStatus = EMPTY_VALUE;
+        }
+    }
+
+    private void extractIncome(String income) {
+        extractDoubleValue(income, this::setIncome);
+    }
+
+    private void extractChildrenAmount(String kidsAmount, String teensAmount) {
+        if (kidsAmount == null || kidsAmount.isEmpty() || teensAmount == null || teensAmount.isEmpty()) {
+            this.childrenAmount = EMPTY_VALUE;
+        } else {
+            this.childrenAmount = Double.parseDouble(kidsAmount) + Double.parseDouble(teensAmount);
+        }
+    }
+
+    private void extractEnrollmentDate(String enrollmentDate) {
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+            Date parsedDate = dateFormat.parse(enrollmentDate);
+            this.enrollmentDate = parsedDate.getTime();
+        } catch (Exception e) {
+            this.enrollmentDate = EMPTY_VALUE;
+        }
+    }
+
+    private void extractRecency(String recency) {
+        extractDoubleValue(recency, this::setRecency);
+    }
+
+    private void extractComplains(String complains) {
+        extractDoubleValue(complains, this::setComplains);
+    }
+
+    private void extractWineAmount(String wineAmount) {
+        extractDoubleValue(wineAmount, this::setWineAmount);
+    }
+
+    private void extractFruitsAmount(String fruitsAmount) {
+        extractDoubleValue(fruitsAmount, this::setFruitsAmount);
+    }
+
+    private void extractMeatAmount(String meatAmount) {
+        extractDoubleValue(meatAmount, this::setMeatAmount);
+    }
+
+    private void extractFishAmount(String fishAmount) {
+        extractDoubleValue(fishAmount, this::setFishAmount);
+    }
+
+    private void extractSweetAmount(String sweetAmount) {
+        extractDoubleValue(sweetAmount, this::setSweetAmount);
+    }
+
+    private void extractGoldAmount(String goldAmount) {
+        extractDoubleValue(goldAmount, this::setGoldAmount);
+    }
+
+    private void extractDiscountPurchasesAmount(String discountPurchasesAmount) {
+        extractDoubleValue(discountPurchasesAmount, this::setDiscountPurchasesAmount);
+    }
+
+    private void extractAcceptedCampaignsAmount(String... acceptedCampaigns) {
+        boolean valid = true;
+        for (String campaign : acceptedCampaigns) {
+            if (campaign == null || campaign.isEmpty()) {
+                valid = false;
+                break;
+            }
+        }
+        if (valid) {
+            double result = 0;
+            for (String campaign : acceptedCampaigns) {
+                result += Double.parseDouble(campaign);
+            }
+            this.acceptedCampaignsAmount = result;
+        } else {
+            this.acceptedCampaignsAmount = EMPTY_VALUE;
+        }
+    }
+
+    private void extractWebPurchasesAmount(String webPurchasesAmount) {
+        extractDoubleValue(webPurchasesAmount, this::setWebPurchasesAmount);
+    }
+
+    private void extractCatalogPurchasesAmount(String catalogPurchasesAmount) {
+        extractDoubleValue(catalogPurchasesAmount, this::setCatalogPurchasesAmount);
+    }
+
+    private void extractStorePurchasesAmount(String storePurchasesAmount) {
+        extractDoubleValue(storePurchasesAmount, this::setStorePurchasesAmount);
+    }
+
+    private void extractWebsiteVisitsAmount(String websiteVisitsAmount) {
+        extractDoubleValue(websiteVisitsAmount, this::setWebsiteVisitsAmount);
+    }
+
+    private void extractDoubleValue(String value, DoubleSetter setter) {
+        if (value == null || value.isEmpty()) {
+            setter.setValue(EMPTY_VALUE);
+        } else {
+            setter.setValue(Double.parseDouble(value));
+        }
     }
 }

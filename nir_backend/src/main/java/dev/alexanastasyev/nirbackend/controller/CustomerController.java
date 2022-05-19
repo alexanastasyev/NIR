@@ -3,6 +3,7 @@ package dev.alexanastasyev.nirbackend.controller;
 import dev.alexanastasyev.nirbackend.model.CustomerCSVModel;
 import dev.alexanastasyev.nirbackend.model.CustomerClusteringModel;
 import dev.alexanastasyev.nirbackend.service.CustomerService;
+import dev.alexanastasyev.nirbackend.util.clustering.OnEmptyFieldStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,10 +38,14 @@ public class CustomerController {
     }
 
     @GetMapping("/clusters")
-    public ResponseEntity<List<Set<Long>>> getCustomerIdsClusters(@RequestParam double level) {
+    public ResponseEntity<List<Set<Long>>> getCustomerIdsClusters(@RequestParam double level,
+                                                                  @RequestParam String strategy) {
         try {
-            List<Set<Long>> clusters = customerService.getCustomerIdsClusters(level);
+            OnEmptyFieldStrategy onEmptyFieldStrategy = OnEmptyFieldStrategy.valueOf(strategy.toUpperCase());
+            List<Set<Long>> clusters = customerService.getCustomerIdsClusters(level, onEmptyFieldStrategy);
             return ResponseEntity.ok(clusters);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new ArrayList<>());
         } catch (IOException e) {
             return ResponseEntity.internalServerError().body(new ArrayList<>());
         }
