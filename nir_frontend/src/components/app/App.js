@@ -37,7 +37,7 @@ class App extends React.Component {
     }
 
     loadData() {
-        axios.get("http://localhost:8080/api/customers/data")
+        axios.get("http://localhost:8080/api/customers/data?strategy=average")
             .then(response => {
                 if (response.status === 200) {
                     this.setState({
@@ -48,10 +48,10 @@ class App extends React.Component {
     }
 
     loadClusters() {
-        const levels = [0, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 2];
+        const levels = [0, 0.5, 0.6, 0.7, 0.8, 1, 2];
 
         levels.forEach((level, index) => {
-            axios.get("http://localhost:8080/api/customers/clusters?level=" + level)
+            axios.get("http://localhost:8080/api/customers/clusters?level=" + level + "&strategy=average")
                 .then(response => {
                     if (response.status === 200) {
                         let newLayers = this.state.layers;

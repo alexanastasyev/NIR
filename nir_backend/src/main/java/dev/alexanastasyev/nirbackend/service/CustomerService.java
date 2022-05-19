@@ -25,8 +25,20 @@ public class CustomerService {
         this.customerRepository = customerRepository;
     }
 
-    public List<CustomerCSVModel> getCustomerCsvModels() throws IOException {
-        return provideCustomerCsvModels();
+    @SuppressWarnings("DuplicateBranchesInSwitch")
+    public List<CustomerCSVModel> getCustomerCsvModels(OnEmptyFieldStrategy strategy) throws IOException {
+        return provideCustomerCsvModels().parallelStream()
+                .filter(model -> {
+                    switch (strategy) {
+                        case SKIP:
+                            return model.hasNoEmptyFields();
+                        case AVERAGE:
+                            return true;
+                        default:
+                            return true;
+                    }
+                })
+                .collect(Collectors.toList());
     }
 
     public List<Set<Long>> getCustomerIdsClusters(double level, OnEmptyFieldStrategy strategy) throws IOException {
@@ -80,7 +92,7 @@ public class CustomerService {
 
         switch (strategy) {
             case SKIP:
-                 break;
+                break;
             case AVERAGE:
                 CustomerClusteringModel averageModel = findAverageModel(clusteringModels);
 

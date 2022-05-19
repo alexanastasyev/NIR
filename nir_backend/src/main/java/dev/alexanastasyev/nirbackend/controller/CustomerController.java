@@ -28,10 +28,13 @@ public class CustomerController {
     }
 
     @GetMapping("/data")
-    public ResponseEntity<List<CustomerCSVModel>> getCustomerModels() {
+    public ResponseEntity<List<CustomerCSVModel>> getCustomerModels(@RequestParam String strategy) {
         try {
-            List<CustomerCSVModel> csvModels = customerService.getCustomerCsvModels();
+            OnEmptyFieldStrategy onEmptyFieldStrategy = OnEmptyFieldStrategy.valueOf(strategy.toUpperCase());
+            List<CustomerCSVModel> csvModels = customerService.getCustomerCsvModels(onEmptyFieldStrategy);
             return ResponseEntity.ok(csvModels);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new ArrayList<>());
         } catch (IOException e) {
             return ResponseEntity.internalServerError().body(new ArrayList<>());
         }
