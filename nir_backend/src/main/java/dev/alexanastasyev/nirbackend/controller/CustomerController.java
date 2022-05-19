@@ -1,7 +1,6 @@
 package dev.alexanastasyev.nirbackend.controller;
 
 import dev.alexanastasyev.nirbackend.model.CustomerCSVModel;
-import dev.alexanastasyev.nirbackend.model.CustomerClusteringModel;
 import dev.alexanastasyev.nirbackend.service.CustomerService;
 import dev.alexanastasyev.nirbackend.util.clustering.OnEmptyFieldStrategy;
 import org.springframework.beans.factory.annotation.Autowired;

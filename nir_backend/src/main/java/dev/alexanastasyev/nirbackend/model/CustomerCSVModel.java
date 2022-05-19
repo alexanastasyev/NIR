@@ -4,6 +4,7 @@ import com.opencsv.bean.CsvBindByPosition;
 
 import java.lang.reflect.Field;
 
+@SuppressWarnings("unused")
 public class CustomerCSVModel {
 
     /**
