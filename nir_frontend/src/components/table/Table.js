@@ -3,6 +3,7 @@ import DataTable from 'react-data-table-component';
 
 import "./Table.css"
 
+// noinspection JSUnresolvedVariable
 class Table extends React.Component {
 
     constructor(props) {

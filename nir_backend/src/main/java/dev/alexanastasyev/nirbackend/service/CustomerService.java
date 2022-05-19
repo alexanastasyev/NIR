@@ -1,18 +1,18 @@
 package dev.alexanastasyev.nirbackend.service;
 
+import dev.alexanastasyev.nirbackend.exception.SelectionIsEmptyException;
 import dev.alexanastasyev.nirbackend.model.CustomerCSVModel;
 import dev.alexanastasyev.nirbackend.model.CustomerClusteringModel;
 import dev.alexanastasyev.nirbackend.repository.CustomerRepository;
-import dev.alexanastasyev.nirbackend.util.clustering.CustomerCSVToClusteringConverter;
 import dev.alexanastasyev.nirbackend.util.clustering.AdjustmentMatrix;
+import dev.alexanastasyev.nirbackend.util.clustering.CustomerClusteringNormalizer;
+import dev.alexanastasyev.nirbackend.util.clustering.OnEmptyFieldStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.function.ToDoubleFunction;
 import java.util.stream.Collectors;
 
 @Component
@@ -25,34 +25,52 @@ public class CustomerService {
         this.customerRepository = customerRepository;
     }
 
-    public List<CustomerCSVModel> getCustomerCsvModels() throws IOException {
-        return customerRepository.getCustomerCsvModels().stream()
-                .filter(CustomerCSVModel::hasNoEmptyFields)
+    @SuppressWarnings("DuplicateBranchesInSwitch")
+    public List<CustomerCSVModel> getCustomerCsvModels(OnEmptyFieldStrategy strategy) throws IOException {
+        return provideCustomerCsvModels().parallelStream()
+                .filter(model -> {
+                    switch (strategy) {
+                        case SKIP:
+                            return model.hasNoEmptyFields();
+                        case AVERAGE:
+                            return true;
+                        default:
+                            return true;
+                    }
+                })
                 .collect(Collectors.toList());
     }
 
-    public List<Set<Long>> getCustomerIdsClusters(double level) throws IOException {
-        AdjustmentMatrix adjustmentMatrix = getAdjustmentMatrix();
+    public List<Set<Long>> getCustomerIdsClusters(double level, OnEmptyFieldStrategy strategy) throws IOException {
+        long startTime = System.currentTimeMillis();
+
+        AdjustmentMatrix adjustmentMatrix = provideAdjustmentMatrix(strategy);
 
         List<Set<Integer>> indexClusters = adjustmentMatrix.getClusters(level);
 
         List<Set<Long>> idsClusters = new ArrayList<>();
-        List<CustomerClusteringModel> customerClusteringModels = getConvertedCustomerClusteringModels();
+        List<CustomerClusteringModel> customerClusteringModels =
+                provideConvertedCustomerClusteringModels(strategy);
         indexClusters.forEach(cluster ->
-            idsClusters.add(
-                cluster.stream().map(index ->
-                    customerClusteringModels.get(index).getId()
-                ).collect(Collectors.toSet())
-            )
+                idsClusters.add(
+                        cluster.stream().map(index ->
+                                customerClusteringModels.get(index).getId()
+                        ).collect(Collectors.toSet())
+                )
         );
+
+        long endTime = System.currentTimeMillis();
+        System.out.println("Level=" + level + ";\tstrategy=" + strategy + ";\t time = " + (endTime - startTime) + " ms.");
 
         return idsClusters;
     }
 
-    private AdjustmentMatrix getAdjustmentMatrix() throws IOException {
-        AdjustmentMatrix adjustmentMatrix = new AdjustmentMatrix(getConvertedCustomerClusteringModels().size());
+    private AdjustmentMatrix provideAdjustmentMatrix(OnEmptyFieldStrategy strategy) throws IOException {
+        AdjustmentMatrix adjustmentMatrix =
+                new AdjustmentMatrix(provideConvertedCustomerClusteringModels(strategy).size());
 
-        List<CustomerClusteringModel> clusteringModels = getConvertedCustomerClusteringModels();
+        List<CustomerClusteringModel> clusteringModels =
+                provideConvertedCustomerClusteringModels(strategy);
 
         for (int i = 0; i < clusteringModels.size() - 1; i++) {
             for (int j = i + 1; j < clusteringModels.size(); j++) {
@@ -64,9 +82,38 @@ public class CustomerService {
         return adjustmentMatrix;
     }
 
-    private List<CustomerClusteringModel> getConvertedCustomerClusteringModels() throws IOException {
-        List<CustomerCSVModel> csvModels = customerRepository.getCustomerCsvModels();
-        return CustomerCSVToClusteringConverter.convertCSVModelsToClustering(csvModels);
+    private List<CustomerClusteringModel> provideConvertedCustomerClusteringModels(OnEmptyFieldStrategy strategy)
+            throws IOException {
+
+        List<CustomerClusteringModel> clusteringModels = provideCustomerCsvModels().parallelStream()
+                .filter(CustomerCSVModel::hasNoEmptyFields)
+                .map(CustomerClusteringModel::new)
+                .collect(Collectors.toList());
+
+        switch (strategy) {
+            case SKIP:
+                break;
+            case AVERAGE:
+                CustomerClusteringModel averageModel = findAverageModel(clusteringModels);
+
+                clusteringModels = provideCustomerCsvModels().parallelStream()
+                        .map(csvModel -> {
+                            CustomerClusteringModel clusteringModel = new CustomerClusteringModel(csvModel);
+                            clusteringModel.replaceEmptyFieldsWithAverage(averageModel);
+                            return clusteringModel;
+                        })
+                        .collect(Collectors.toList());
+                break;
+            default:
+                clusteringModels = new ArrayList<>();
+        }
+
+        CustomerClusteringNormalizer.normalizeCustomerModels(clusteringModels);
+        return clusteringModels;
+    }
+
+    private List<CustomerCSVModel> provideCustomerCsvModels() throws IOException {
+        return customerRepository.getCustomerCsvModels().parallelStream().collect(Collectors.toList());
     }
 
     private double calculateDistance(CustomerClusteringModel model1, CustomerClusteringModel model2) {
@@ -100,6 +147,62 @@ public class CustomerService {
 
     private double sqrDiff(double value1, double value2) {
         return Math.pow(value1 - value2, 2);
+    }
+
+    @SuppressWarnings("DuplicatedCode")
+    private CustomerClusteringModel findAverageModel(List<CustomerClusteringModel> clusteringModels) {
+        double birthYear = findAverageValue(clusteringModels, CustomerClusteringModel::getBirthYear);
+        double education = findAverageValue(clusteringModels, CustomerClusteringModel::getEducation);
+        double maritalStatus = findAverageValue(clusteringModels, CustomerClusteringModel::getMaritalStatus);
+        double income = findAverageValue(clusteringModels, CustomerClusteringModel::getIncome);
+        double childrenAmount = findAverageValue(clusteringModels, CustomerClusteringModel::getChildrenAmount);
+        double enrollmentDate = findAverageValue(clusteringModels, CustomerClusteringModel::getEnrollmentDate);
+        double recency = findAverageValue(clusteringModels, CustomerClusteringModel::getRecency);
+        double complains = findAverageValue(clusteringModels, CustomerClusteringModel::getComplains);
+        double wineAmount = findAverageValue(clusteringModels, CustomerClusteringModel::getWineAmount);
+        double fruitsAmount = findAverageValue(clusteringModels, CustomerClusteringModel::getFruitsAmount);
+        double meatAmount = findAverageValue(clusteringModels, CustomerClusteringModel::getMeatAmount);
+        double fishAmount = findAverageValue(clusteringModels, CustomerClusteringModel::getFishAmount);
+        double sweetAmount = findAverageValue(clusteringModels, CustomerClusteringModel::getSweetAmount);
+        double goldAmount = findAverageValue(clusteringModels, CustomerClusteringModel::getGoldAmount);
+        double discountPurchasesAmount = findAverageValue(clusteringModels, CustomerClusteringModel::getDiscountPurchasesAmount);
+        double acceptedCampaignsAmount = findAverageValue(clusteringModels, CustomerClusteringModel::getAcceptedCampaignsAmount);
+        double webPurchasesAmount = findAverageValue(clusteringModels, CustomerClusteringModel::getWebPurchasesAmount);
+        double catalogPurchasesAmount = findAverageValue(clusteringModels, CustomerClusteringModel::getCatalogPurchasesAmount);
+        double storePurchasesAmount = findAverageValue(clusteringModels, CustomerClusteringModel::getStorePurchasesAmount);
+        double websiteVisitsAmount = findAverageValue(clusteringModels, CustomerClusteringModel::getWebsiteVisitsAmount);
+
+        CustomerClusteringModel clusteringModel = new CustomerClusteringModel();
+
+        clusteringModel.setBirthYear(birthYear);
+        clusteringModel.setEducation(education);
+        clusteringModel.setMaritalStatus(maritalStatus);
+        clusteringModel.setIncome(income);
+        clusteringModel.setChildrenAmount(childrenAmount);
+        clusteringModel.setEnrollmentDate(enrollmentDate);
+        clusteringModel.setRecency(recency);
+        clusteringModel.setComplains(complains);
+        clusteringModel.setWineAmount(wineAmount);
+        clusteringModel.setFruitsAmount(fruitsAmount);
+        clusteringModel.setMeatAmount(meatAmount);
+        clusteringModel.setFishAmount(fishAmount);
+        clusteringModel.setSweetAmount(sweetAmount);
+        clusteringModel.setGoldAmount(goldAmount);
+        clusteringModel.setDiscountPurchasesAmount(discountPurchasesAmount);
+        clusteringModel.setAcceptedCampaignsAmount(acceptedCampaignsAmount);
+        clusteringModel.setWebPurchasesAmount(webPurchasesAmount);
+        clusteringModel.setCatalogPurchasesAmount(catalogPurchasesAmount);
+        clusteringModel.setStorePurchasesAmount(storePurchasesAmount);
+        clusteringModel.setWebsiteVisitsAmount(websiteVisitsAmount);
+
+        return clusteringModel;
+    }
+
+    private double findAverageValue(List<CustomerClusteringModel> clusteringModels,
+                                    ToDoubleFunction<CustomerClusteringModel> getterReference) {
+        return clusteringModels.parallelStream()
+                .mapToDouble(getterReference)
+                .average().orElseThrow(SelectionIsEmptyException::new);
     }
 
 }

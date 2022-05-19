@@ -9,7 +9,8 @@ class Clusters extends React.Component {
         super(props);
 
         this.state = {
-            clusters: props.clusters
+            clusters: props.clusters,
+            showSmall: props.showSmall
         }
 
     }
@@ -24,7 +25,9 @@ class Clusters extends React.Component {
             },
             series: [{
                 name: 'Cluster size',
-                data: this.state.clusters.map(cluster => cluster.length),
+                data: this.state.clusters
+                    .map(cluster => cluster.length)
+                    .filter(size => this.state.showSmall ? true : size >= 5),
                 dataLabels: {
                     enabled: true
                 },
@@ -43,7 +46,9 @@ class Clusters extends React.Component {
 
                 <table>
                     <tbody>
-                        {this.state.clusters.map((cluster, clusterIndex) =>
+                        {this.state.clusters
+                            .filter(cluster => this.state.showSmall ? true : cluster.length >= 5)
+                            .map((cluster, clusterIndex) =>
                             <tr key={clusterIndex}>
                                 <td className={"cluster-table-item"}>{clusterIndex}</td>
                                 <td className={"cluster-table-item"}>
