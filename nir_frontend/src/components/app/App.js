@@ -24,11 +24,13 @@ class App extends React.Component {
         this.state = {
             data: "",
             layers: [],
-            layersLoaded: false
+            layersLoaded: false,
+            strategy: "average"
         }
 
         this.loadData = this.loadData.bind(this);
         this.loadClusters = this.loadClusters.bind(this);
+        this.handleStrategyChanged = this.handleStrategyChanged.bind(this);
     }
 
     componentDidMount() {
@@ -37,7 +39,7 @@ class App extends React.Component {
     }
 
     loadData() {
-        axios.get("http://localhost:8080/api/customers/data?strategy=average")
+        axios.get("http://localhost:8080/api/customers/data?strategy=" + this.state.strategy)
             .then(response => {
                 if (response.status === 200) {
                     this.setState({
@@ -48,10 +50,10 @@ class App extends React.Component {
     }
 
     loadClusters() {
-        const levels = [0, 0.5, 0.6, 0.7, 0.8, 1, 2];
+        const levels = [0, 0.2, 0.3, 0.5, 1, 2];
 
         levels.forEach((level, index) => {
-            axios.get("http://localhost:8080/api/customers/clusters?level=" + level + "&strategy=average")
+            axios.get("http://localhost:8080/api/customers/clusters?level=" + level + "&strategy=" + this.state.strategy)
                 .then(response => {
                     if (response.status === 200) {
                         let newLayers = this.state.layers;
@@ -71,6 +73,16 @@ class App extends React.Component {
 
     }
 
+    handleStrategyChanged(strategy) {
+        this.setState({
+            strategy: strategy,
+            layersLoaded: false
+        }, () => {
+            this.loadData();
+            this.loadClusters();
+        });
+    }
+
     render() {
         return (
             <div className="app">
@@ -88,7 +100,7 @@ class App extends React.Component {
 
                         <Route path="/clusters" element={
                             this.state.layersLoaded ?
-                                <Layers layers={this.state.layers}/> :
+                                <Layers layers={this.state.layers} strategy={this.state.strategy} onStrategyChanged={this.handleStrategyChanged}/> :
                                 <Loading/>
                         }/>
 
